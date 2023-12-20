@@ -32,6 +32,9 @@ mv $temp_folder/* $destination_folder
 # Check for success
 if [ $? -eq 0 ]; then
     echo "Przeniesiono zawartość repozytorium do $destination_folder."
+    cd $destination_folder
+    nohup sudo python gui.py > /dev/null 2>&1 &
+    echo "Program GUI uruchomiony w tle."
 else
     echo "Błąd podczas przenoszenia zawartości repozytorium. Sprawdź uprawnienia do zapisu."
 fi
@@ -50,3 +53,6 @@ sudo systemctl daemon-reload
 
 # Turn on daemon
 sudo systemctl enable start.service
+
+# Start service
+sudo systemctl start start.service
