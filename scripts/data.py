@@ -51,34 +51,35 @@ if __name__ == "__main__":
 	chan_3 = AnalogIn(mcp, MCP.P3)
 	
 	url = "https://python-microservice-api.greenmind.site/devices/data"
+ 
+    get_token(token_url, file_path)
 	
-	try:
-		while True:
-			get_token(token_url, file_path)
-			bearer_token = read_token("/home/pi/Documents/scripts/token.txt")
-			
-			air_hum = chan_0.value
-			temp = chan_1.value
-			light = chan_2.value
-			soil_hum = chan_3.value
-			
-			data = {
-				"soil_hum": soil_hum,
-				"light": light,
-				"air_hum": 50,
-				"temp": 24
-			}
-			
-			headers = {
-				"Authorization": f"Bearer {bearer_token}",
-				"Content-Type": "application/json"
-			}
-			
-			response = requests.post(url, json=data, headers=headers)
-			
-			print('working data.py')
-			time.sleep(10)
-			
-	
-	except KeyboardInterrupt:
-		print("\nProgram terminated by the user.")
+    while True:
+        try:
+            bearer_token = read_token("/home/pi/Documents/scripts/token.txt")
+            
+            air_hum = chan_0.value
+            temp = chan_1.value
+            light = chan_2.value
+            soil_hum = chan_3.value
+            
+            data = {
+                "soil_hum": soil_hum,
+                "light": light,
+                "air_hum": 50,
+                "temp": 24
+            }
+            
+            headers = {
+                "Authorization": f"Bearer {bearer_token}",
+                "Content-Type": "application/json"
+            }
+            
+            response = requests.post(url, json=data, headers=headers)
+            
+            print('working data.py')
+            time.sleep(10)
+        except:
+            get_token(token_url, file_path)
+        except KeyboardInterrupt:
+            print("\nProgram terminated by the user.")
