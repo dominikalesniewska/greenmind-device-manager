@@ -37,6 +37,37 @@ def read_token(token_path):
 	
 	return bearer_token 
 
+def read_values(file_name):
+	with open(file_name, "r") as file:
+		real_values = []
+		sensor_values = []
+		
+		for line in file:
+			parts = line.split()
+			
+			if len(parts) >= 2:
+				real_value = float(parts[0].replace(",", "."))
+				real_values.append(real_value)
+				
+				value = float(parts[1].replace(",", "."))
+				sensor_values.append(value)
+	return real_values, sensor_values
+
+def predict(value, real_value, sensor_value):
+	n = len(real_value)
+	mean_x = sum(real_value) / n
+	mean_y = sum(sensor_value) / n
+
+	numer = sum(
+		(x - mean_x) * (y - mean_y) for x, y in zip(real_value, sensor_value)
+	)
+	denom = sum((x - mean_x) ** 2 for x in real_value)
+
+	slope = numer / denom
+	intercept = mean_y - slope * mean_x
+	
+	return (value - intercept) / slope
+
 if __name__ == "__main__":
 	token_url = "https://python-microservice-api.greenmind.site/request_token"
 	file_path = "/var/lib/greenmind/device_id.txt"
@@ -51,35 +82,42 @@ if __name__ == "__main__":
 	chan_3 = AnalogIn(mcp, MCP.P3)
 	
 	url = "https://python-microservice-api.greenmind.site/devices/data"
- 
-    get_token(token_url, file_path)
 	
-    while True:
-        try:
-            bearer_token = read_token("/home/pi/Documents/scripts/token.txt")
-            
-            air_hum = chan_0.value
-            temp = chan_1.value
-            light = chan_2.value
-            soil_hum = chan_3.value
-            
-            data = {
-                "soil_hum": soil_hum,
-                "light": light,
-                "air_hum": 50,
-                "temp": 24
-            }
-            
-            headers = {
-                "Authorization": f"Bearer {bearer_token}",
-                "Content-Type": "application/json"
-            }
-            
-            response = requests.post(url, json=data, headers=headers)
-            
-            print('working data.py')
-            time.sleep(10)
-        except:
-            get_token(token_url, file_path)
-        except KeyboardInterrupt:
-            print("\nProgram terminated by the user.")
+	try:
+		while True:
+			get_token(token_url, file_path)
+			bearer_token = read_token("/home/pi/Documents/scripts/token.txt")
+			
+			air_hum = chan_0.value
+			temp = chan_1.value
+			light = chan_2.value
+			soil_hum = chan_3.value
+			
+			real_temp, sens_temp = read_values("temp.txt")
+			real_hum, sens_hum = read_values("hig.txt")
+			
+			temp = round(predict(temp, real_temp, sens_temp), 1)
+			air_hum = round(predict(air_hum, real_hum, sens_hum))
+			soil_hum = round((1 - (soil_hum / 66000)) * 100)
+			light = round((light / 51000) * 100)
+			
+			data = {
+				"soil_hum": soil_hum,
+				"light": light,
+				"air_hum": air_hum,
+				"temp": temp
+			}
+			
+			headers = {
+				"Authorization": f"Bearer {bearer_token}",
+				"Content-Type": "application/json"
+			}
+			
+			response = requests.post(url, json=data, headers=headers)
+			
+			print('working data.py')
+			time.sleep(10)
+			
+	
+	except KeyboardInterrupt:
+		print("\nProgram terminated by the user.")
