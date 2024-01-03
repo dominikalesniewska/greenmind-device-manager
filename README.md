@@ -2,7 +2,7 @@
 
 Oficjalna strona do znalezienia [tutaj]
 
-[tutaj]: https://growbox-website.vercel.app/
+[tutaj]: [https://www.greenmind.site]
 
 ## Sposób użycia
 
