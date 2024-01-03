@@ -13,7 +13,7 @@ def get_token(url, file_path):
 	
 	try:
 		with open(file_path, "r") as file:
-			device_id = int(file.read().strip())
+			device_id = file.read().strip()
 		
 		data = {"device_id": device_id}
 		body = json.dumps(data)
@@ -95,11 +95,23 @@ if __name__ == "__main__":
 			
 			real_temp, sens_temp = read_values("temp.txt")
 			real_hum, sens_hum = read_values("hig.txt")
+			real_light, sens_light = read_values("light.txt")
 			
 			temp = round(predict(temp, real_temp, sens_temp), 1)
 			air_hum = round(predict(air_hum, real_hum, sens_hum))
 			soil_hum = round((1 - (soil_hum / 66000)) * 100)
-			light = round((light / 51000) * 100)
+			light = round(predict(light, real_light, sens_light) + 1.67)
+			
+			if light < 0:
+				light = 0
+			elif light > 100:
+				light = 100
+			
+			temp = str(temp)
+			air_hum = str(air_hum)
+			soil_hum = str(soil_hum)
+			light = str(light)
+			
 			
 			data = {
 				"soil_hum": soil_hum,
