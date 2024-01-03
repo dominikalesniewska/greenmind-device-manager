@@ -2,7 +2,7 @@
 
 Oficjalna strona do znalezienia [tutaj]
 
-[tutaj]: [https://www.greenmind.site]
+[tutaj]: [https://www.greenmind.site/]
 
 ## Sposób użycia
 
